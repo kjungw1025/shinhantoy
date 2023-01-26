@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>주문 상세 페이지</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script>
+            let total = 0;
+            let cur = 1;
+
+            $(document).ready(function () {
+                $.get("http://127.0.0.1:8000/api/order?page=" + cur)   
+                    .then((result) => {
+                        $("#orders").html("");
+
+                        total = result.count;
+
+                        for (let i = 0; i < result.results.length; i++) {   // results 안에 실제 데이터가 들어있음
+                            const order = result.results[i];
+
+                            $("#orders").append(
+                                $(`<tr><td>${order.ord_ymd}</td>
+                                <td>${order.acct_mang_dbrn_code}</td>
+                                <td><a href="order_detail.html?ord_no=${order.ord_no}">${order.ord_no}</a></td>
+                                <td>${order.acct_no}</td>
+                                <td>${order.callv_type_code}</td>
+                                <td>${order.sell_buy_tp_code}</td>
+                                <td>${order.stbd_code}</td>
+                                <td>${order.ord_qty}</td>
+                                <td>${order.ord_uv}</td>
+                                <td>${order.mrgn_base_uv}</td></tr>`)
+                            )
+                        }
+                    });
+
+                $(".backpage").click(function () {
+                    cur -= 1;
+                    if (cur >= 1) {
+                        $.get("http://127.0.0.1:8000/api/order?page=" + cur)
+                            .then((result) => {
+                                $("#orders").html("");
+    
+                                for (let i = 0; i < result.results.length; i++) {   // results 안에 실제 데이터가 들어있음
+                                    const order = result.results[i];
+    
+                                    $("#orders").append(
+                                        $(`<tr><td>${order.ord_ymd}</td>
+                                        <td>${order.acct_mang_dbrn_code}</td>
+                                        <td><a href="order_detail.html?ord_no=${order.ord_no}">${order.ord_no}</a></td>
+                                        <td>${order.acct_no}</td>
+                                        <td>${order.callv_type_code}</td>
+                                        <td>${order.sell_buy_tp_code}</td>
+                                        <td>${order.stbd_code}</td>
+                                        <td>${order.ord_qty}</td>
+                                        <td>${order.ord_uv}</td>
+                                        <td>${order.mrgn_base_uv}</td></tr>`)
+                                    )
+                                }   
+                            });
+                    }
+                    else
+                        cur = 1;
+                });
+
+                $(".nextpage").click(function () {
+                    cur += 1;
+                    if (cur <= Math.ceil(total / 10)) { // pagination : 10으로 설정했음
+                        $.get("http://127.0.0.1:8000/api/order?page=" + cur)
+                            .then((result) => {
+                                $("#orders").html("");
+        
+                                for (let i = 0; i < result.results.length; i++) {   // results 안에 실제 데이터가 들어있음
+                                        const order = result.results[i];
+        
+                                        $("#orders").append(
+                                            $(`<tr><td>${order.ord_ymd}</td>
+                                            <td>${order.acct_mang_dbrn_code}</td>
+                                            <td><a href="order_detail.html?ord_no=${order.ord_no}">${order.ord_no}</a></td>
+                                            <td>${order.acct_no}</td>
+                                            <td>${order.callv_type_code}</td>
+                                            <td>${order.sell_buy_tp_code}</td>
+                                            <td>${order.stbd_code}</td>
+                                            <td>${order.ord_qty}</td>
+                                            <td>${order.ord_uv}</td>
+                                            <td>${order.mrgn_base_uv}</td></tr>`)
+                                        )
+                                }
+                            });             
+                    }
+                });
+            });
+
+        </script>
+
+        <style>
+            td, th {
+                padding: 20px;
+            }
+            td a {
+                color: black;
+                text-decoration: none;
+            }
+        </style>
+    </head>
+
+    <body>
+        <button type="button" class="backpage">&lt</button>
+        <button type="button" class="nextpage">&gt</button>        
+        <table>
+            <thead>
+                <tr><th>ord_ymd</th>
+                <th>acct_mang_dbrn_code</th>
+                <th>ord_no</th>
+                <th>acct_no</th>
+                <th>callv_type_code</th>
+                <th>sell_buy_tp_code</th>
+                <th>stbd_code</th>
+                <th>ord_qty</th>
+                <th>ord_uv</th>
+                <th>mrgn_base_uv</th></tr>
+            </thead>
+
+            <tbody id="orders">
+            </tbody>
+        </table>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    </body>
+</html>
