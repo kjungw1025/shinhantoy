@@ -33,23 +33,6 @@
                                 )
                             }
                         });
-                            // for (let i = 0; i < result.results.length; i++) {   // results 안에 실제 데이터가 들어있음
-                            //         const order = result.results[i];
-    
-                            //         $("#orders").append(
-                            //             $(`<tr><td>${order.ord_ymd}</td>
-                            //             <td>${order.acct_mang_dbrn_code}</td>
-                            //             <td>${order.ord_no}</td>
-                            //             <td>${order.acct_no}</td>
-                            //             <td>${order.callv_type_code}</td>
-                            //             <td>${order.sell_buy_tp_code}</td>
-                            //             <td>${order.stbd_code}</td>
-                            //             <td>${order.ord_qty}</td>
-                            //             <td>${order.ord_uv}</td>
-                            //             <td>${order.mrgn_base_uv}</td></tr>`)
-                            //         )
-            
-                            //     }   
 
                     $.get("http://127.0.0.1:8000/api/order/" + ord_id + '/comment')
                     .then((result) => {
@@ -59,7 +42,7 @@
                             const comment = result.results[i];
 
                             $("#comments").append(
-                                $(`<li class="list-group-item">${comment.content}<br><br>(${comment.tstamp})</li>`)
+                                $(`<li class="list-group-item">${comment.content}<br><br>${comment.member_username}   (${comment.tstamp})</li>`)
                             )
                         }
                     });         
