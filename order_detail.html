@@ -9,31 +9,49 @@
         <script>
             $(document).ready(function () {
                 const search = new URLSearchParams(location.search);  
-                const ord_no = search.get('ord_no');
-                if (ord_no > 0) {
-                    $.get("http://127.0.0.1:8000/api/order/" + ord_no)
+                const ord_id = search.get('ord_id');
+
+                if (ord_id > 0) {
+                    $.get("http://127.0.0.1:8000/api/order/" + ord_id)
                         .then((result) => {
                             $("#orders").html("");
 
-                            for (let i = 0; i < result.results.length; i++) {   // results 안에 실제 데이터가 들어있음
-                                    const order = result.results[i];
-    
-                                    $("#orders").append(
-                                        $(`<tr><td>${order.ord_ymd}</td>
-                                        <td>${order.acct_mang_dbrn_code}</td>
-                                        <td>${order.ord_no}</td>
-                                        <td>${order.acct_no}</td>
-                                        <td>${order.callv_type_code}</td>
-                                        <td>${order.sell_buy_tp_code}</td>
-                                        <td>${order.stbd_code}</td>
-                                        <td>${order.ord_qty}</td>
-                                        <td>${order.ord_uv}</td>
-                                        <td>${order.mrgn_base_uv}</td></tr>`)
-                                    )
-                                }   
+                            for (let i = 0; i < result.results.length; i++) {
+                                const order = result.results[i];
+                                $("#orders").append(
+                                            $(`<tr><td>${order.ord_ymd}</td>
+                                            <td>${order.id}</td>
+                                            <td>${order.acct_mang_dbrn_code}</td>
+                                            <td>${order.ord_no}</td>
+                                            <td>${order.acct_no}</td>
+                                            <td>${order.callv_type_code}</td>
+                                            <td>${order.sell_buy_tp_code}</td>
+                                            <td>${order.stbd_code}</td>
+                                            <td>${order.ord_qty}</td>
+                                            <td>${order.ord_uv}</td>
+                                            <td>${order.mrgn_base_uv}</td></tr>`)
+                                )
+                            }
                         });
+                            // for (let i = 0; i < result.results.length; i++) {   // results 안에 실제 데이터가 들어있음
+                            //         const order = result.results[i];
+    
+                            //         $("#orders").append(
+                            //             $(`<tr><td>${order.ord_ymd}</td>
+                            //             <td>${order.acct_mang_dbrn_code}</td>
+                            //             <td>${order.ord_no}</td>
+                            //             <td>${order.acct_no}</td>
+                            //             <td>${order.callv_type_code}</td>
+                            //             <td>${order.sell_buy_tp_code}</td>
+                            //             <td>${order.stbd_code}</td>
+                            //             <td>${order.ord_qty}</td>
+                            //             <td>${order.ord_uv}</td>
+                            //             <td>${order.mrgn_base_uv}</td></tr>`)
+                            //         )
+            
+                            //     }   
 
-                    $.get("http://127.0.0.1:8000/api/order/" + ord_no + '/comment')
+                    $.get("http://127.0.0.1:8000/api/order/" + ord_id + '/comment')
                     .then((result) => {
                         $("#comments").html("");
 
@@ -41,7 +59,7 @@
                             const comment = result.results[i];
 
                             $("#comments").append(
-                                $(`<li class="list-group-item">${comment.content}<br><br>${comment.ordno_id}(${comment.tstamp})</li>`)
+                                $(`<li class="list-group-item">${comment.content}<br><br>(${comment.tstamp})</li>`)
                             )
                         }
                     });         
@@ -50,13 +68,13 @@
 
             function create() {
                 const search = new URLSearchParams(location.search);  
-                const ord_no = search.get('ord_no');
+                const ord_id = search.get('ord_id');
 
                 $.ajax({
                     type: 'POST',
-                    url: 'http://127.0.0.1:8000/api/order/comment',
+                    url: 'http://127.0.0.1:8000/api/order/' + ord_id + '/comment',
                     data: {
-                        ordno: ord_no,
+                        order: ord_id,
                         content: $("#content").val(),
                     },
                     beforeSend: function(xhr) {
@@ -83,6 +101,7 @@
         <table>
             <thead>
                 <tr><th>ord_ymd</th>
+                <th>ord_id</th>
                 <th>acct_mang_dbrn_code</th>
                 <th>ord_no</th>
                 <th>acct_no</th>

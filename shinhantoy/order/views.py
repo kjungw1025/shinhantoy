@@ -30,41 +30,62 @@ class OrderDetailView(
     generics.GenericAPIView  
 ):
     serializer_class = OrderDetailSerializer
-    pagination_class = OrderLargePagination
+    # pagination_class = OrderLargePagination
 
     def get_queryset(self):
-        ord_no = self.kwargs.get('ord_no')
-        return Order.objects.filter(ord_no=ord_no)
+        order_id = self.kwargs.get('ord_id')
+        return Order.objects.filter(id=order_id)
+        # return Order.objects.all().order_by('id')
 
     def get(self, request, *args, **kwargs):
         return self.list(request, args, kwargs)   
 
-class CommentListView(
-    mixins.ListModelMixin, 
-    generics.GenericAPIView  
-):
-    serializer_class = CommentSerializer
-    pagination_class = OrderLargePagination
+# class CommentListView(
+#     mixins.ListModelMixin, 
+#     generics.GenericAPIView  
+# ):
+#     serializer_class = CommentSerializer
+#     pagination_class = OrderLargePagination
 
-    def get_queryset(self):
-        ord_no = self.kwargs.get('ordno')
-        if ord_no:
-            return Comment.objects.filter(ord_no=ord_no)
-        return Comment.objects.none()
+#     def get_queryset(self):
+#         ordno_id = self.kwargs.get('ordno')
+#         if ordno_id:
+#             return Comment.objects.filter(ordno_id=ordno_id)
+#         return Comment.objects.none()
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, args, kwargs)
+#     def get(self, request, *args, **kwargs):
+#         return self.list(request, args, kwargs)
 
-class CommentCreateView(
+# class CommentCreateView(
+#     mixins.CreateModelMixin,
+#     generics.GenericAPIView
+# ):
+#     permission_classes = [IsAuthenticated]
+
+#     serializer_class = CommentCreateSerializer
+
+#     def get_queryset(self):
+#         return Comment.objects.all().order_by('-id')
+
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, args, kwargs)
+
+class CommentView(
     mixins.CreateModelMixin,
+    mixins.ListModelMixin,
     generics.GenericAPIView
 ):
-    permission_classes = [IsAuthenticated]
-
-    serializer_class = CommentCreateSerializer
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CommentCreateSerializer
+        return CommentSerializer
 
     def get_queryset(self):
-        return Comment.objects.all().order_by('-id')
+        pk = self.kwargs.get('pk')
+        return Comment.objects.filter(order_id=pk)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, args, kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, args, kwargs)

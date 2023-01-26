@@ -22,7 +22,7 @@ class Order (models.Model):
 
 class Comment (models.Model):
     member = models.ForeignKey('member.Member', on_delete=models.CASCADE, verbose_name='사용자')
-    ordno = models.ForeignKey('order.Order', on_delete=models.CASCADE, verbose_name='주문번호')
+    order = models.ForeignKey('order.Order', on_delete=models.CASCADE, verbose_name='주문번호')
     content = models.TextField(verbose_name="내용")
     tstamp = models.DateTimeField(auto_now_add=True, verbose_name='등록일시')
 

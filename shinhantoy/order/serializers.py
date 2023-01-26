@@ -13,14 +13,10 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    order_ordno = serializers.SerializerMethodField()
     member_username = serializers.SerializerMethodField()
     tstamp = serializers.DateTimeField(
         read_only = True, format = '%Y-%m-%d %H:%M:%S'
     )
-
-    def get_order_ordno (self, obj):
-        return obj.order.ordno
     
     def get_member_username (self, obj):
         return obj.member.username
