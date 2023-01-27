@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ko">
     <head>
@@ -20,6 +19,10 @@
                     page = 1;
                 }
                 cur = page;
+
+                page = Number(page);
+
+                console.log(page - 2, page + 2);
 
                 if (ord_id > 0) {
                     $.get("http://127.0.0.1:8000/api/order/" + ord_id)
@@ -49,13 +52,51 @@
                             $("#comments").html("");
 
                             total = result.count;
-                            let pages = Math.ceil(total / 5);
-
-                            // pagination
-                            for (let i = 0; i < pages; i++) {
-                                $("#pagination").append(
-                                    $(`<li class="page-item"><a class="page-link" onclick="go_page(${i + 1})" id="${i + 1}">${i + 1}</a></li>`)                                
-                                );
+                            let max_pages = Math.ceil(total / 5);   // comment의 pagination 5로 설정
+                            if (page == 1) {
+                                if (page + 2 <= max_pages) {
+                                    for (let i = page; i <= page + 2; i++) {
+                                        $("#pagination").append(
+                                            $(`<li class="page-item"><a class="page-link" onclick="go_page(${i})" id="${i}">${i}</a></li>`)                                
+                                        );                                   
+                                    }                                       
+                                }
+                                else {
+                                    for (let i = page; i <= max_pages; i++) {
+                                            $("#pagination").append(
+                                                $(`<li class="page-item"><a class="page-link" onclick="go_page(${i})" id="${i}">${i}</a></li>`)                                
+                                            );                                   
+                                    }                                 
+                                }
+                            }
+                            else if (page == 2) {
+                                for (let i = page - 1; i <= max_pages; i++) {
+                                        $("#pagination").append(
+                                            $(`<li class="page-item"><a class="page-link" onclick="go_page(${i})" id="${i}">${i}</a></li>`)                                
+                                        );                                   
+                                }                                    
+                            }
+                            else if (page - 2 > 0 && page + 1 == max_pages) {
+                                for (let i = page - 2; i <= page + 1; i++) {
+                                        $("#pagination").append(
+                                            $(`<li class="page-item"><a class="page-link" onclick="go_page(${i})" id="${i}">${i}</a></li>`)                                
+                                        );                                   
+                                }                                  
+                            }
+                            else if (page - 2 > 0 && page == max_pages) {
+                                for (let i = page - 2; i <= page; i++) {
+                                        $("#pagination").append(
+                                            $(`<li class="page-item"><a class="page-link" onclick="go_page(${i})" id="${i}">${i}</a></li>`)                                
+                                        );                                   
+                                }                                    
+                            }
+                            else if (page - 2 >= 0 && page + 2 <= max_pages)
+                            {
+                                for (let i = page - 2; i <= page + 2; i++) {
+                                    $("#pagination").append(
+                                        $(`<li class="page-item"><a class="page-link" onclick="go_page(${i})" id="${i}">${i}</a></li>`)                                
+                                    );                                   
+                                }                                 
                             }
                             $(`#${page}`).addClass('active');
                             
