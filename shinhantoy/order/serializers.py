@@ -18,7 +18,7 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only = True, format = '%Y-%m-%d %H:%M:%S'
     )
     
-    def get_member_username (self, obj):
+    def get_member_username (self, obj):    # 커스텀 필드 self: serializer, obj: 해당 객체
         return obj.member.username
 
     class Meta:

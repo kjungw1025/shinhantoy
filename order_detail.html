@@ -7,9 +7,17 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
         <script>
+            let total = 0;
+            let cur = 1;
+
             $(document).ready(function () {
                 const search = new URLSearchParams(location.search);  
                 const ord_id = search.get('ord_id');
+                let page = search.get('page');      
+                
+                if (!page) {
+                    page = 1;
+                }
 
                 if (ord_id > 0) {
                     $.get("http://127.0.0.1:8000/api/order/" + ord_id)
@@ -34,18 +42,81 @@
                             }
                         });
 
-                    $.get("http://127.0.0.1:8000/api/order/" + ord_id + '/comment')
-                    .then((result) => {
-                        $("#comments").html("");
+                    $.get("http://127.0.0.1:8000/api/order/" + ord_id + '/comment?page=' + cur)
+                        .then((result) => {
+                            $("#comments").html("");
 
-                        for (let i = 0; i < result.results.length; i++) {
-                            const comment = result.results[i];
+                            total = result.count;
+                            let pages = Math.ceil(total / 5);
 
-                            $("#comments").append(
-                                $(`<li class="list-group-item">${comment.content}<br><br>${comment.member_username}   (${comment.tstamp})</li>`)
-                            )
+                            // pagination
+                            for (let i = 0; i < pages; i++) {
+                                $("#pagination").append(
+                                    $(`<li class="page-item"><a class="page-link" onclick="go_page(${i + 1})" id="${i + 1}">${i + 1}</a></li>`)                                
+                                );
+                            }
+                            $(`#${page}`).addClass('active');
+                            
+
+                            // comments
+                            for (let i = 0; i < result.results.length; i++) {
+                                const comment = result.results[i];
+
+                                $("#comments").append(
+                                    $(`<li class="list-group-item">${comment.content}<br><br>${comment.member_username}   (${comment.tstamp})
+                                        <input type="text" class="form-control" id="tokentodel" name="tokentodel">
+                                        <button type="button" class="btn btn-primary" onclick="del(${comment.id})">삭제</button>
+                                    </li>`)
+                                    )
+                            }
+                        });
+                    
+                    $(".backpage").click(function () {
+                        cur -= 1;
+                        if (cur >= 1) {
+                            $.get("http://127.0.0.1:8000/api/order/" + ord_id + '/comment?page=' + cur)
+                                .then((result) => {
+                                    $("#comments").html("");
+
+                                    for (let i = 0; i < result.results.length; i++) {
+                                        const comment = result.results[i];
+
+                                        $("#comments").append(
+                                            $(`<li class="list-group-item">${comment.content}<br><br>${comment.member_username}   (${comment.tstamp})
+                                                <input type="text" class="form-control" id="tokentodel" name="tokentodel">
+                                                <button type="button" class="btn btn-primary" onclick="del(${comment.id})">삭제</button>
+                                            </li>`)
+                                        )  
+                                    }
+                                });                            
                         }
-                    });         
+                        else
+                            cur = 1;
+                    });
+
+                    $(".nextpage").click(function () {
+                        if (cur >= Math.ceil(total / 5))    // comment의 pagination 5로 설정했음
+                            return;
+
+                        cur += 1;
+                        if (cur <= Math.ceil(total / 5)) {
+                            $.get("http://127.0.0.1:8000/api/order/" + ord_id + '/comment?page=' + cur)
+                                .then((result) => {
+                                    $("#comments").html("");
+
+                                    for (let i = 0; i < result.results.length; i++) {
+                                        const comment = result.results[i];
+
+                                        $("#comments").append(
+                                            $(`<li class="list-group-item">${comment.content}<br><br>${comment.member_username}   (${comment.tstamp})
+                                                <input type="text" class="form-control" id="tokentodel" name="tokentodel">
+                                                <button type="button" class="btn btn-primary" onclick="del(${comment.id})">삭제</button>
+                                            </li>`)
+                                        )
+                                    }
+                                });                            
+                        }
+                    });
                 }
             });
 
@@ -65,12 +136,45 @@
                     },
                     success: (result) => {
                         alert("댓글이 등록되었습니다.");
+                        location.reload();
                     },
                     error: (result) => {
                         console.error(result);
                     }
                 })
-            }      
+            }
+
+
+            function del(commentid) {
+                const search = new URLSearchParams(location.search);  
+                const ord_id = search.get('ord_id');
+
+                $.ajax({
+                    type: 'DELETE',
+                    url: 'http://127.0.0.1:8000/api/order/' + ord_id + '/comment',
+                    data: {
+                        order: ord_id,
+                        id: commentid,
+                    },
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("Authorization", "JWT " + $("#tokentodel").val());
+                    },
+                    success: (result) => {
+                        alert("댓글이 삭제되었습니다.");
+                        location.reload();
+                    },
+                    error: (result) => {
+                        console.error(result);
+                    }
+                })
+            }    
+        
+            function go_page(page) {
+                const search = new URLSearchParams(location.search);
+                const ord_id = search.get('ord_id'); 
+
+                window.location.href = `?ord_id=${ord_id}&page=${page}`;
+            }
         </script>
 
         <style>
@@ -100,6 +204,7 @@
             </tbody>
         </table>
         <hr>
+
         <div class="container">
             <div class="form-group mb-3">
                 <label for="token">토큰</label>
@@ -114,8 +219,18 @@
             </div>
         </div>
         <hr>
+
+        <div class="d-grid gap-2 d-md-block">
+            <button class="btn btn-primary backpage" type="button">&lt</button>
+            <button class="btn btn-primary nextpage" type="button">&gt</button>
+        </div>   
         <ul class="list-group list-group-flush" id="comments">
         </ul>     
+
+        <nav aria-label="Page navigation example">
+            <ul class="pagination" id="pagination">
+            </ul>
+        </nav>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
     </body>
 </html>

@@ -7,8 +7,11 @@ from .serializers import (
     CommentSerializer,
     CommentCreateSerializer
 )
-from .paginations import OrderLargePagination
+from .paginations import OrderLargePagination, CommentPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
 
 # Create your views here.
 
@@ -27,54 +30,27 @@ class OrderListView(
 
 class OrderDetailView(
     mixins.ListModelMixin, 
-    generics.GenericAPIView  
+    generics.GenericAPIView,
+    # mixins.RetrieveModelMixin,
 ):
     serializer_class = OrderDetailSerializer
-    # pagination_class = OrderLargePagination
 
     def get_queryset(self):
         order_id = self.kwargs.get('ord_id')
         return Order.objects.filter(id=order_id)
-        # return Order.objects.all().order_by('id')
+        # return Order.objects.all().order_by('-id')
 
     def get(self, request, *args, **kwargs):
         return self.list(request, args, kwargs)   
-
-# class CommentListView(
-#     mixins.ListModelMixin, 
-#     generics.GenericAPIView  
-# ):
-#     serializer_class = CommentSerializer
-#     pagination_class = OrderLargePagination
-
-#     def get_queryset(self):
-#         ordno_id = self.kwargs.get('ordno')
-#         if ordno_id:
-#             return Comment.objects.filter(ordno_id=ordno_id)
-#         return Comment.objects.none()
-
-#     def get(self, request, *args, **kwargs):
-#         return self.list(request, args, kwargs)
-
-# class CommentCreateView(
-#     mixins.CreateModelMixin,
-#     generics.GenericAPIView
-# ):
-#     permission_classes = [IsAuthenticated]
-
-#     serializer_class = CommentCreateSerializer
-
-#     def get_queryset(self):
-#         return Comment.objects.all().order_by('-id')
-
-#     def post(self, request, *args, **kwargs):
-#         return self.create(request, args, kwargs)
+        # return self.retrieve(request, args, kwargs)   
 
 class CommentView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     generics.GenericAPIView
 ):
+    pagination_class = CommentPagination
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CommentCreateSerializer
@@ -89,3 +65,10 @@ class CommentView(
 
     def get(self, request, *args, **kwargs):
         return self.list(request, args, kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        commentid = request.data.get('id')
+        memberid = request.user.id
+        comment = Comment.objects.filter(id=commentid, member_id=memberid)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
